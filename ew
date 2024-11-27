@@ -1,104 +1,48 @@
-const handleInputChange = (e) => {
-  const { id, value, type } = e.target;
+const handleMarketChange = (e) => {
+  console.log('Market Change Event:', e);  // Log the event to inspect its structure
 
-  // Handling "year" selection
-  if (id === "year") {
-    setWave(wavesByYear[value]);
+  const target = e.target || e.detail || e.data || e.payload;  // Try to access the event target
 
-    // Extract market codes based on the selected year
-    const allMarketCodes = data
-      .filter((item) => item.YEAR === value)
-      .flatMap((item) => item.MARKET_CODES.split(',').map((code) => code.trim()));
-
-    const uniqueMarketCodes = Array.from(new Set(allMarketCodes));
-    const codes = uniqueMarketCodes.map((code) => ({
-      name: code,
-      value: code,
-    }));
-
-    console.log(codes); // Debug log for extracted codes
-    setMarket(codes);
-
-    // Update formData state for "markets" field
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      markets: [],
-    }));
+  if (!target) {
+    console.error('Event target is missing');
     return;
   }
 
-  // Handling "markets" selection (including "select_all" and "clear_all")
-  if (id === "markets") {
-    let updatedMarkets = [...(formData.markets || [])];
+  const { id, value } = target;
 
-    if (value.includes("clear_all")) {
-      updatedMarkets = []; // Clear all selections
-    } else if (value.includes("select_all")) {
-      updatedMarkets = market.map((item) => item.name); // Select all markets
-    } else {
-      // Toggle individual market selection
-      updatedMarkets = updatedMarkets.includes(value)
-        ? updatedMarkets.filter((market) => market !== value)
-        : [...updatedMarkets, value];
-    }
-
-    // Update formData with the new selection
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      markets: updatedMarkets,
-    }));
-    console.log("Updated Markets:", updatedMarkets); // Debug log for selected markets
-  }
-};
-const handleInputChange = (e) => {
-  const { id, value, type } = e.target;
-
-  // Handling "year" selection
-  if (id === "year") {
-    setWave(wavesByYear[value]);
-
-    // Extract market codes based on the selected year
-    const allMarketCodes = data
-      .filter((item) => item.YEAR === value)
-      .flatMap((item) => item.MARKET_CODES.split(',').map((code) => code.trim()));
-
-    const uniqueMarketCodes = Array.from(new Set(allMarketCodes));
-    const codes = uniqueMarketCodes.map((code) => ({
-      name: code,
-      value: code,
-    }));
-
-    console.log(codes); // Debug log for extracted codes
-    setMarket(codes);
-
-    // Update formData state for "markets" field
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      markets: [],
-    }));
+  if (!id || !value) {
+    console.error('Missing id or value');
     return;
   }
 
-  // Handling "markets" selection (including "select_all" and "clear_all")
   if (id === "markets") {
-    let updatedMarkets = [...(formData.markets || [])];
+    let inputValue = [];
 
-    if (value.includes("clear_all")) {
-      updatedMarkets = []; // Clear all selections
-    } else if (value.includes("select_all")) {
-      updatedMarkets = market.map((item) => item.name); // Select all markets
-    } else {
-      // Toggle individual market selection
-      updatedMarkets = updatedMarkets.includes(value)
-        ? updatedMarkets.filter((market) => market !== value)
-        : [...updatedMarkets, value];
+    // Handle 'clear_all' action: Clears all selected markets
+    if (value === "clear_all") {
+      inputValue = [];
+    }
+    // Handle 'select_all' action: Selects all available markets
+    else if (value === "select_all") {
+      inputValue = market.map(item => item.value);  // Assuming `market` is an array of market options
+    }
+    // Handle individual market selections
+    else {
+      // Ensure that the value is in an array format (handles both single and multiple selections)
+      inputValue = Array.isArray(value) ? value : [value];
     }
 
-    // Update formData with the new selection
-    setFormData((prevFormData) => ({
+    console.log('Updated inputValue for markets:', inputValue);
+
+    // Update the form data with selected markets
+    setFormData(prevFormData => ({
       ...prevFormData,
-      markets: updatedMarkets,
+      markets: inputValue
     }));
-    console.log("Updated Markets:", updatedMarkets); // Debug log for selected markets
+
+    // Update the `market` state with the selected market values
+    setMarket(inputValue);
+
+    console.log('Updated markets:', inputValue);
   }
 };
